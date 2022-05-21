@@ -12,6 +12,7 @@ import 'package:getwidget/components/accordion/gf_accordion.dart';
 import 'package:hidable/hidable.dart';
 import 'package:scomv1/codeRepete/constants.dart';
 import 'package:scomv1/screens/authenticate/register.dart';
+import 'package:scomv1/screens/chat/chat.dart';
 import 'package:scomv1/screens/pages/brouillon.dart';
 import 'package:scomv1/screens/pages/aSupprimer/demande.dart';
 import 'package:scomv1/screens/pages/editrofil.dart';
@@ -63,7 +64,14 @@ class _ListeDemandeState extends State<ListeDemande> {
   }
 
   
-
+String chatRoomId(String user1, String user2) {
+    if (user1[0].toLowerCase().codeUnits[0] >
+        user2.toLowerCase().codeUnits[0]) {
+      return "$user1$user2";
+    } else {
+      return "$user2$user1";
+    }
+  }
   @override
   
   Widget build(BuildContext context) {
@@ -227,13 +235,56 @@ class _ListeDemandeState extends State<ListeDemande> {
                               controller: scrollController,
                               children: documents
                                   .map((doc) => GestureDetector(
-                                        child: GFAccordion(
+                                        child: Container(
+                                          height: 250,
+                                          width: double.infinity,  
+                                        
+                                         child: Column(
+                                            children: [
+                                              GFAccordion(
                                             title: doc["sujet"],
                                             content: doc["message"],
+                                            
                                             collapsedIcon:
                                                 Icon(Icons.expand_more_rounded),
                                             expandedIcon: Icon(
-                                                Icons.expand_less_rounded)),
+                                                Icons.expand_less_rounded)
+                                                
+                                                
+                                        ),
+                                       /* ElevatedButton.icon(
+                                                  icon: const Icon(
+                                                    Icons.message_rounded,
+                                                    color: Color.fromARGB(255, 255, 255, 238),
+                                                    size: 24.0,
+                                                  ),
+                                                  label: Text('Message'),
+                                                  onPressed: () {
+                                                    String roomId = chatRoomId(
+                                                        doc["libelle"], doc.id);
+                                                     Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            ChatRoom(
+                                                          chatRoomId: roomId,
+                                                          userId: doc["user"],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    shape: new RoundedRectangleBorder(
+                                                      borderRadius: new BorderRadius.circular(20.0),
+                                                    ),
+                                                  ),
+                                                ),*/
+                                            ],
+                                         ),
+                                        
+                                        
+                                        )
+                                        
                                       ))
                                   .toList());
                         } else if (snapshot.hasError) {
@@ -322,6 +373,7 @@ class _ListeDemandeState extends State<ListeDemande> {
                                         "specialite": specialite,
                                         "description": description,
                                         "sousRubrique": widget.detailId,
+                                        "users":user!.uid
                                       }).then((_) {
                                         Text("Prestation soumit avec succès");
                                       });

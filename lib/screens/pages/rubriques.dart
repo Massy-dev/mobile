@@ -12,22 +12,28 @@ import 'package:scomv1/screens/chat/chat.dart';
 import 'package:scomv1/screens/pages/brouillon.dart';
 import 'package:scomv1/screens/pages/editrofil.dart';
 import 'package:scomv1/screens/pages/listeElement/listAnnonce.dart';
+import 'package:scomv1/screens/pages/listeElement/listePrestation.dart';
 import 'package:scomv1/screens/pages/sousRubrique.dart';
 //import 'package:provider/provider.dart';
 
 
 
-class ListeRubrique extends StatelessWidget {
+class ListeRubrique extends StatefulWidget {
 
  
+  @override
+  State<ListeRubrique> createState() => _ListeRubriqueState();
+}
+
+class _ListeRubriqueState extends State<ListeRubrique> {
   User? user = FirebaseAuth.instance.currentUser;
- 
-
- 
 
   Future<QuerySnapshot> rubriques =
       FirebaseFirestore.instance.collection('Rubriques').get();
-
+ signIn() async {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Register()));
+  }
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
@@ -57,16 +63,25 @@ class ListeRubrique extends StatelessWidget {
                       controller: scrollController,
                       children: documents
                           .map((doc) => GestureDetector(
+                              
                                 onTap: () => {
                                   debugPrint('Navigation en cour.'),
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          SousRubriques(documentId: doc.id),
-                                    ),
-                                  )
+                                        
+                                          (FirebaseAuth.instance.currentUser != null)
+                                          ?SousRubriques(documentId: doc.id):
+                                          
+                                          signIn(),
+                                          
+                                    )
+                                    )
+                                  
+                      
                                 },
+
                                 child: Card(
                                   margin: const EdgeInsets.all(20.0),
                                     shape: RoundedRectangleBorder(
@@ -109,8 +124,10 @@ class ListeRubrique extends StatelessWidget {
                                           ]),
                                       clipBehavior: Clip.antiAlias,
                                     )),
-                              ))
-                          .toList());
+                              )
+                              )
+                          .toList()
+                          );
                 } else if (snapshot.hasError) {
                   return Text("faux");
                 }

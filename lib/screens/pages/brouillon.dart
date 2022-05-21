@@ -1606,5 +1606,1037 @@ class AfterSplash extends StatelessWidget {
   }
 }
 
+ /*child: Ink(
+                              decoration: BoxDecoration(
+                                color: Colors.deepOrangeAccent,
+                                  /*gradient: const LinearGradient(colors: [
+                                    Colors.blue,
+                                    Colors.blue
+                                  ]),*/
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Container(
+                                width: 200,
+                                height: 50,
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  'Connexion',
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),*/
                            */
+    *************tabs**********
+                            actualise(2);
+TabBarView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    controller: _tabController,
+                    children: [
+                        Anonces(),
+                        ListeRubrique(),
+                        MyHomePage(),
+                        Register(),
+                      ]),
+
+
+
+
+
+
+
+
+
+                      import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:scomv1/screens/authenticate/register.dart';
+import 'package:scomv1/screens/chat/chat.dart';
+import 'package:scomv1/screens/pages/create_profil.dart';
+import 'package:scomv1/screens/pages/listeElement/listAnnonce.dart';
+import 'package:scomv1/screens/pages/rubriques.dart';
+
+const String page1 = "Accueil";
+const String page2 = "Anonces";
+const String page3 = "Profile";
+const String page4 = "Messages";
+const String title = "Demo";
+
+final listeTitle = <String>["Accueil", "Anonces", "Profil", "Messages"];
+
+String pageTitre = "Accueil";
+
+class MyHomePage extends StatefulWidget {
+  //const MyHomePage({Key? key, required this.title}) : super(key: key);
+  //final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  User? user = FirebaseAuth.instance.currentUser;
+  //signout function
+  signOut() async {
+    await auth.signOut();
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Register()));
+  }
+int declencheur = 0;
+
+  void actualise(a) async {
+    setState(() {
+      declencheur = a;
+    });
+  }
+
+  late List<Widget> _pages;
+  late Widget _page1;
+  late Widget _page2;
+  late Widget _page3;
+  //late Widget _page4;
+
+  late int _currentIndex;
+  late Widget _currentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _page1 = ListeRubrique();
+    _page2 = Anonces();
+    _page3 = CreateProfil(
+      userId: user!.uid,
+    );
+    //_page4 = ChatRoom(chatRoomId: '', userId: '');
+    //_page3 = Page3(changePage: _changeTab);
+    _pages = [_page1, _page2, _page3];
+
+    _currentIndex = 0;
+    _currentPage = _page1;
+  }
+
+  void _changeTab(int index) {
+    setState(() {
+      _currentIndex = index;
+      _currentPage = _pages[index];
+    });
+  }
+
+  List<Tab> tabs = <Tab>[
+  const Tab(text: 'Zeroth'),
+  const Tab(text: 'First'),
+  const Tab(text: 'Second'),
+];
+
+  late final _tabController = TabController(length: tabs.length, vsync: this);
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+        length:tabs.length,
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 110,
+
+            centerTitle: true,
+            //leading: Icon(Icons.person_outline),
+
+            title: Text(
+              pageTitre,
+              style: const TextStyle(fontSize: 24.0),
+            ),
+            bottom: PreferredSize(
+                child: Container(
+                  /*decoration: const BoxDecoration(
+                      color: Color.fromARGB(255, 22, 70, 228),
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(50),
+                          bottomRight: Radius.circular(50))),*/
+
+                  child: TabBar(
+                      controller: _tabController,
+                      
+
+                      isScrollable: true,
+                      unselectedLabelColor: Colors.white,
+                      labelColor: Color.fromARGB(255, 5, 104, 218),
+                      indicator: const BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15)),
+                          color: Color.fromARGB(255, 255, 255, 255)),
+                          onTap: (int index) {
+                            actualise(2);
+                          },
+                      tabs: tabs,
+                     
+
+                      ),
+                ),
+                preferredSize: const Size.fromHeight(30.0)),
+            actions: <Widget>[
+              const Padding(
+                padding: EdgeInsets.only(right: 16.0),
+              ),
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () {
+                  signOut();
+                },
+              )
+            ],
+          ),
+          body: //_currentPage,
+              Container(
+            child: (declencheur == 1)
+                ? _currentPage
+                :  TabBarView(
+                      children: tabs.map((Tab tab) {
+                        return Center(
+                          child: Text(
+                            '${tab.text!} Tab',
+                            style: Theme.of(context).textTheme.headline5,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+              onTap: (index) {
+                _changeTab(index);
+                pageTitre = listeTitle[index];
+                actualise(1);
+              },
+              currentIndex: _currentIndex,
+              items: const [
+                BottomNavigationBarItem(
+                  label: page1,
+                  icon: Icon(Icons.home),
+                ),
+                BottomNavigationBarItem(
+                  label: page2,
+                  icon: Icon(Icons.home_repair_service),
+                ),
+                BottomNavigationBarItem(
+                  label: page3,
+                  icon: Icon(Icons.person),
+                ),
+              ]),
+          drawer: Drawer(
+            child: Container(
+              margin: const EdgeInsets.only(top: 15.0),
+              child: Column(
+                children: <Widget>[
+                  _navigationItemListTitle(page1, 0),
+                  _navigationItemListTitle(page2, 1),
+                  _navigationItemListTitle(page3, 2),
+                ],
+              ),
+            ),
+          ),
+        ));
+  }
+
+  Widget _navigationItemListTitle(String title, int index) {
+    return ListTile(
+      title: Text(
+        '$title Page',
+        style: TextStyle(color: Colors.blue[400], fontSize: 22.0),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        _changeTab(index);
+      },
+    );
+  }
+}
+**************bOTTOM**********
+ButtonBar(
+                                    alignment: MainAxisAlignment.start,
+                                    children: [
+                                      /*FlatButton(
+                                        textColor: const Color(0xFF6200EE),
+                                        onPressed: () {
+                                          String roomId = chatRoomId(
+                                              doc["libelle"], doc.id);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ChatRoom(
+                                                chatRoomId: roomId,
+                                                userId: doc["annonceurId"],
+                                              ),
+                                            ),
+                                          );
+                                          print(userId);
+                                        },
+                                        child: const Text('Laisser un message'),
+                                      ),
+                                      FlatButton(
+                                        textColor: const Color(0xFF6200EE),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SingleAnonce(
+                                                      anonceId: doc.id),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text('Details'),
+                                      ),
+                                      ElevatedButton.icon(
+                                                                  
+                                        style: ElevatedButton.styleFrom(
+                                          primary: Colors.white,
+                                                                    //padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                                          fixedSize: const Size(300, 50),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(30.0),
+                                           ),
+                                                                    
+                                                                    ),
+                                           onPressed: (){
+                                            Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SingleAnonce(
+                                                      anonceId: doc.id),
+                                            ),
+                                          );
+                                           }, 
+                                           icon: const Icon(
+                                          Icons.details,
+                                          color: Colors.blue,
+                                          ),  //icon data for elevated button
+                                          label: Text("Details",
+                                          style: TextStyle(
+                                             color: Colors.blue,
+                                             fontSize: 20,
+                                           ),), //label text 
+                                       ),*/
+                                    ],
+                                  ),
+                                  (1 == 1)
+
+                 ?IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () {
+                      signOut();
+                    },)
+                    
+                    :
+
+                    ********dialog******
+                     Theme(
+                                             
+                                            data:Theme.of(context).copyWith(dialogBackgroundColor: Colors.white),
+                           
+                                          child:AlertDialog(
+                                            
+                                            title: Text("Success"),
+                                              titleTextStyle: 
+                                                TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,fontSize: 20),
+                                                actionsOverflowButtonSpacing: 20,
+                                                actions: [
+                                                  ElevatedButton(onPressed: (){
+                                                  }, child: Text("Back")),
+                                                  ElevatedButton(onPressed: (){
+                                                  }, child: Text("Next")),
+                                                ],
+                                                content: Text("Saved successfully"),
+                                                
+                                        ),
+
+                                    ),
+                                    FirebaseFirestore.instance
+        .collection('chatroom')
+        .get()
+        .then((querySnapshot) {
+
+          setState(() {
+          contenu = querySnapshot.docs[0].id;
+        });
+      /*for (var result in querySnapshot.docs) {
+        setState(() {
+          contenu = result.id;
+        });
+        
+        print("resultat $contenu");data["emetteur"]
+      }*/
+    });
+    FirebaseFirestore.instance
+        .collection("chatroom")
+        .snapshots.data.;
+    .then((value) {
+      for (var result in value.docs) {
+        print(result.id);
+      }
+    });
+
+
+    *****************chatlist****************
+    import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+class ChatListe extends StatefulWidget {
+  const ChatListe({Key? key}) : super(key: key);
+
+  @override
+  State<ChatListe> createState() => _ChatListeState();
+}
+
+class _ChatListeState extends State<ChatListe> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  Future<QuerySnapshot> chats =
+      FirebaseFirestore.instance.collection('chatroom').get();
+
+  String contenu = "";
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ScrollController scrollController = ScrollController();
+
+    return Scaffold(body: Container(child: StreamBuilder<QuerySnapshot>(
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      if (snapshot.hasError) {
+        print(snapshot.error);
+      }
+
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text("Loading");
+      }
+
+      return FutureBuilder<QuerySnapshot>(
+          future: chats,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final List<DocumentSnapshot> documents = snapshot.data!.docs;
+              return ListView(
+                 controller: scrollController,
+                  children: documents
+                  
+                  .map((doc) => GestureDetector(
+                              
+                                onTap: () => {
+                                  
+                                },
+
+                                child: Card(
+                                  margin: const EdgeInsets.all(20.0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    elevation: 5,
+                                    child: Container(
+                                      height: 250,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                          image: DecorationImage(
+                                              fit: BoxFit.cover,
+                                              image:
+                                                  NetworkImage(doc.))),
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Expanded(
+                                                child: Positioned(
+                                              bottom: 0,
+                                              child: Container(
+                                                width: double.infinity,
+                                                height: 55,
+                                                color: Color.fromARGB(
+                                                    179, 32, 115, 240),
+                                                child: Text(
+                                                  doc.id,
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.white,
+                                                      fontSize: 24),
+                                                ),
+                                                alignment: Alignment.center,
+                                              ),
+                                            ))
+                                          ]),
+                                      clipBehavior: Clip.antiAlias,
+                                    )),
+                              )
+                              )
+                          .toList()
+                  
+                  );
+            } else if (snapshot.hasError) {
+              return Text("faux");
+            }
+            return CircularProgressIndicator();
+          });
+    })));
+  }
+}
+StreamBuilder<QuerySnapshot>(
+      stream: _firestore.collection('Rubriques').snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.data != null) {
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              Map<String, dynamic> map =
+                  snapshot.data!.docs[index].data() as Map<String, dynamic>;
+
+              if (map.isNotEmpty) {
+                print(map);
+              } else {
+                print("empty*-*-----------");
+              }
+
+              return info( map, context);
+            },
+          );
+        } else {
+          return Container(child: Text("bien"),);
+        }
+      },
+    );
+     /*
+    var firebaseUser = FirebaseFirestore.instance
+        .collection("chatroom")
+        .doc("nV4MM32ckRYiSfUNTuFbGtxUvN12Id")
+        .collection("Chats")
+        .get();
+
+    firebaseUser.then((value) {
+      value.docs.forEach((result) {
+        print(result.data());
+      });
+    });*/
+
+        StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('chatroom')
+          .doc("ANhW4kZunz4njDa924vh")
+          .collection('chats')
+          .orderBy("time", descending: false)
+          .snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.data != null) {
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              Map<String, dynamic> map =
+                  snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                  print(map["message"]);
+              return messages(map, context);
+            },
+          );
+        } else {
+          return Container(
+            child:Text("data" ,print("test"));
+        }
+      },
+    );
+
+
+
+
+    child: Column(
+              children: [
+          Container(
+            
+              width: size.width,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('Utilisateurs')
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.data!.docs != null) {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      
+                      Map<String, dynamic> map = snapshot.data!.docs[index]
+                          .data() as Map<String, dynamic>;
+                      for (var i in myList) {
+                     if (myList[i] == map["id"]) {
+                           return response(size ,map, context);
+                        }
+                      }
+                     return response(size ,map, context);
+                    },
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            ),
+          ),
+        ])));
+  }
+
+  Widget response(size ,nom, BuildContext context) {
+    return Container(
+      child: Container(
+       width: size.width,
+        child: Text(
+          nom,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+
+
+
+    *********************
+    for (int i = 0; i < userListe.length; i++) {
+                final List<DocumentSnapshot> documents =
+                    userListe[i].data!.docs;
+                print(userListe);
+                  return ListView(
+                    children: documents
+                        .map((doc) => GestureDetector(
+                              child: Text(doc.id),
+                            ))
+                        .toList());
+              }
+
+              itemCount: userListe.length,
+          itemBuilder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+
+            return Text(userListe[index]);
+
+          }
+
+          content: Container(
+                                    width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(width: 5.0, color: Colors.lightBlue.shade600),
+                                      //bottom: BorderSide(width: 2.0, color: Colors.lightBlue.shade900),
+                                    ),
+                                    color: Colors.white,
+                                  )
+    ***************card********
+    GFCard(
+                                    
+                                    height: 80,
+                                    boxFit: BoxFit.cover,
+                                    titlePosition: GFPosition.start,
+                                    
+                                    elevation:2,
+                                    shape: Border(left: BorderSide(width: 10.0, color: Colors.lightBlue.shade900)),
+                                    showImage: true,
+                                    
+                                    title: GFListTile(
+                                      
+                                      avatar: GFAvatar(
+                                        backgroundImage: NetworkImage(doc["photo"])!= "" 
+                                        ?NetworkImage(doc["photo"])
+                                        :const NetworkImage("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png", ),
+                                      ),
+                                      titleText: doc["nom"],
+                                      subTitleText: doc["prenom"],
+                                    ),
+                                    
+                                  
+                                ),
+                                
+    /*Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: <Widget>[
+                                            TextButton(
+                                              child: const Text('BUY TICKETS'),
+                                              onPressed: () {/* ... */},
+                                            ),
+                                            const SizedBox(width: 8),
+                                            TextButton(
+                                              child: const Text('LISTEN'),
+                                              onPressed: () {/* ... */},
+                                            ),
+                                            const SizedBox(width: 8),
+                                          ],
+                                        ),*/
+  ---------------RIBRIQUE-----------
+  import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hidable/hidable.dart';
+import 'package:scomv1/screens/authenticate/register.dart';
+import 'package:scomv1/screens/pages/aSupprimer/demande.dart';
+import 'package:scomv1/screens/pages/listeElement/listeDemande.dart';
+import 'package:scomv1/screens/pages/listeElement/listePrestation.dart';
+import 'package:scomv1/screens/pages/aSupprimer/prestation.dart';
+
+
+class SousRubriques extends StatefulWidget {
+  
+  
+  final String documentId;
+
+  SousRubriques({required this.documentId});
+
+  @override
+  State<SousRubriques> createState() => _SousRubriquesState();
+}
+
+class _SousRubriquesState extends State<SousRubriques> {
+     int index = 0;
+     final ScrollController scrollController = ScrollController();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  signOut() async {
+        await auth.signOut();
+        Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Register()));
+      }
+    
+  @override
+  Widget build(BuildContext context) {
+    
+    Future<QuerySnapshot<Map<String, dynamic>>> rubriques = FirebaseFirestore
+        .instance
+        .collection('Rubriques')
+        //.doc(widget.documentId)
+        //.collection("sous-rubriques")
+        .get();
+
+   
+
+    return DefaultTabController(
+        length: 6,
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            toolbarHeight: 110,
+
+            centerTitle: true,
+            //leading: Icon(Icons.person_outline),
+
+            title: Text(
+              'Services',
+              style: TextStyle(fontSize: 24.0),
+            ),
+            bottom: PreferredSize(
+                child: Container(
+                  /*decoration: const BoxDecoration(
+                      color: Color.fromARGB(255, 22, 70, 228),
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(50),
+                          bottomRight: Radius.circular(50))),*/
+
+                  child: TabBar(
+                      isScrollable: true,
+                      unselectedLabelColor: Colors.white.withOpacity(0.3),
+                      indicatorColor: Colors.white,
+                      tabs: [
+                        Tab(
+                          child: Text('Tab 1'),
+                        ),
+                        Tab(
+                          child: Text('Investment'),
+                        ),
+                        Tab(
+                          child: Text('Your Earning'),
+                        ),
+                        Tab(
+                          child: Text('Current Balance'),
+                        ),
+                        Tab(
+                          child: Text('Tab 5'),
+                        ),
+                        Tab(
+                          child: Text('Tab 6'),
+                        )
+                      ]),
+                ),
+                preferredSize: Size.fromHeight(30.0)),
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+              ),
+              new IconButton(
+                icon: Icon(Icons.logout),
+                onPressed: () {
+                  signOut();
+                },
+              )
+            ],
+          ),
+          body: Container(
+            padding: EdgeInsets.only(
+                  left: 15.0, top: 15.0, right: 15.0, bottom: 10.0),
+            child: StreamBuilder<QuerySnapshot>(builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                print(snapshot.error);
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Text("Loading");
+              }
+              return FutureBuilder<QuerySnapshot>(
+                  future: rubriques,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final List<DocumentSnapshot> documents =
+                          snapshot.data!.docs;
+                      return ListView(
+                        controller: scrollController,
+                          children: documents
+                              .map((doc) => GestureDetector(
+                                  onTap: () => {
+                                        showDialog<String>(
+                                          // barrierColor: Colors.transparent,
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              AlertDialog(
+                                            //title: contextst Text('AlertDialog Title'),
+                                            //content: const Text('AlertDialog description'),
+
+                                            actions: [
+                                              SizedBox(
+                                                  width: MediaQuery.of(context).size.width,
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                     children: [
+                                                        ButtonTheme(
+                                                          minWidth: 30.0,
+                                                          height: 60.0,
+                                                          
+                                                                child:ElevatedButton.icon(
+                                                                  
+                                                                  style: ElevatedButton.styleFrom(
+                                                                    primary: Colors.white,
+                                                                    fixedSize: const Size(300, 50),
+                                                                    shape: RoundedRectangleBorder(
+                                                                      borderRadius: BorderRadius.circular(30.0),
+                                                                    ),
+                                                                    
+                                                                    ),
+                                                                    onPressed: ()=>{
+                                                                      Navigator.push(
+                                                                            context,
+                                                                            MaterialPageRoute(
+                                                                                builder: (context) =>
+                                                                                    ListePrestation(
+                                                                                        detailId:
+                                                                                            doc.id)),
+                                                                          ),
+                                                                    }, 
+                                                                    icon: const Icon(
+                                                                    Icons.info_outline_rounded,
+                                                                    color: Colors.blue,
+                                                                    ),  //icon data for elevated button
+                                                                    label: Text("Demander un service",
+                                                                    style: TextStyle(
+                                                                      color: Colors.blue,
+                                                                      fontSize: 20,
+                                                                    ),), //label text 
+                                                                ),
+
+                                                                
+                                                        ),
+
+                                                        SizedBox(height: 30),
+
+                                                        ButtonTheme(
+                                                            minWidth: 30.0,
+                                                            height: 60.0,
+                                                        
+                                                                child:ElevatedButton.icon(
+                                                                  
+                                                                  style: ElevatedButton.styleFrom(
+                                                                    primary: Colors.white,
+                                                                    //padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                                                                    fixedSize: const Size(300, 50),
+                                                                    shape: RoundedRectangleBorder(
+                                                                      borderRadius: BorderRadius.circular(30.0),
+                                                                    ),
+                                                                    
+                                                                    ),
+                                                                    onPressed: (){
+                                                                      Navigator.push(
+                                                                              context,
+                                                                              MaterialPageRoute(
+                                                                                  builder: (context) =>
+                                                                                      ListeDemande(
+                                                                                          detailId:
+                                                                                              doc.id)),
+                                                                            );
+                                                                    }, 
+                                                                    icon: const Icon(
+                                                                    Icons.business_center_rounded,
+                                                                    color: Colors.blue,
+                                                                    ),  //icon data for elevated button
+                                                                    label: Text("Proposer un service",
+                                                                    style: TextStyle(
+                                                                      color: Colors.blue,
+                                                                      fontSize: 20,
+                                                                    ),), //label text 
+                                                                ),
+                                                              
+                                                             )
+
+
+                                                       
+                                                     ] 
+                                                      )
+                                              )
+                                            ],
+                                            backgroundColor: Color.fromARGB(0, 255, 82, 82),
+                                            
+                                          ),
+                                        )
+                                      },
+                                   
+                                child: Column(
+                                  children: <Widget>[
+                                    if(doc.id== widget.documentId || doc["nom"])
+                                      Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                        ),
+                                        elevation: 5,
+                                        child: Container(
+                                          height: 250,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                              image: DecorationImage(
+                                                  fit: BoxFit.cover,
+                                                  image: NetworkImage(
+                                                      doc['image']))
+                                          ),
+                                        child: Column(
+                                               mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                              Expanded(
+                                                child: Positioned(
+                                                  bottom:0, 
+                                                  child: Container(
+                                                  width: double.infinity,
+                                                  height: 55,
+                                                  color: Color.fromARGB(179, 32, 115, 240),
+                                                  child: Text(
+                                                    doc["nom"],
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                      fontSize: 24
+                                                      ),
+                                                    ),
+                                                  alignment: Alignment.center, 
+                                                
+                                                ),
+                                               
+                                               
+                                              
+                                            ))]),
+                                         
+
+                                        
+                                          clipBehavior: Clip.antiAlias,
+                                        )
+                                 ) ]
+                                  
+                                  
+                                  ),
+                              )
+                                  )
+                              .toList());
+
+
+                    } else if (snapshot.hasError) {
+                      return Text("faux");
+                    }
+                    return CircularProgressIndicator();
+                  });
+            }),
+         
+          ),
+           bottomNavigationBar:Hidable(
+              controller: scrollController,
+              wOpacity: true, // As default it's true
+              size: kBottomNavigationBarHeight, // As default it's same.
+              child: BottomNavigationBar(
+                currentIndex: index,
+                onTap: (i) => setState(() => index = i),
+                items: bottomBarItems(),
+              ),)
+        ));
+  }
+
+ List<BottomNavigationBarItem> bottomBarItems() {
+    return [
+      BottomNavigationBarItem(
+        label: 'Home',
+        icon: const Icon(Icons.home, color: Color.fromARGB(255, 12, 109, 219)),
+        
+      ),
+      BottomNavigationBarItem(
+        label: 'Favorites',
+        icon: const Icon(Icons.favorite, color: Color.fromARGB(255, 12, 109, 219)),
+       
+      ),
+      BottomNavigationBarItem(
+        label: 'Profile',
+        icon: const Icon(Icons.person, color: Color.fromARGB(255, 12, 109, 219)),
+       
+      ),
+      BottomNavigationBarItem(
+        label: 'Settings',
+        icon: const Icon(Icons.settings, color: Color.fromARGB(255, 12, 109, 219)),
+       
+      ),
+    ];
+  }
+}
+
+
+Future<List<Tab>> getTabs() async {
+    
+    tabs.clear();
+    final QuerySnapshot users =
+        await FirebaseFirestore.instance.collection('Rubriques').get();
+    final List<DocumentSnapshot> utilisateurs = users.docs;
+
+    for (var element in utilisateurs) {
+      tabs.add(getTab(element['nom']));
+      print(element['nom']);
+    }
+    print(tabs);
+    return tabs;
+  }
+
+  Tab getTab(int widgetNumber) {
+    return Tab(
+      text: "${tabTextList[widgetNumber]}",
+    );
+  }
                           */

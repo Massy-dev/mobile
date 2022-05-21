@@ -8,42 +8,52 @@ import 'package:scomv1/screens/authenticate/register.dart';
 class SingleAnonce extends StatelessWidget {
   @override
   final String anonceId;
- 
+
   const SingleAnonce({required this.anonceId});
 
   Widget build(BuildContext context) {
     Future<dynamic> friendsList;
-  final FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    User? user = FirebaseAuth.instance.currentUser;
 
-  int _currentIndex = 0;
-   String userId = "";
-  String nom = "";
-  bool isLoading = false;
+    int _currentIndex = 0;
+    String userId = "";
+    String nom = "";
+    bool isLoading = false;
 
-
-   signOut() async {
-    await auth.signOut();
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => Register()));
-  }  
+    signOut() async {
+      await _auth.signOut();
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Register()));
+    }
 
     CollectionReference anonces =
         FirebaseFirestore.instance.collection('Anonces');
-  
-  String chatRoomId(String user1, String user2) {
-    if (user1[0].toLowerCase().codeUnits[0] >
-        user2.toLowerCase().codeUnits[0]) {
-      return "$user1$user2";
-    } else {
-      return "$user2$user1";
+
+    String chatRoomId(String user1, String user2) {
+      var chat1 = 0;
+      var chat2 = 0;
+
+      for (var i = 0; i < user1.toLowerCase().codeUnits.length; i++) {
+        chat1 += user1.toLowerCase().codeUnits[i];
+      }
+
+      for (var i = 0; i < user2.toLowerCase().codeUnits.length; i++) {
+        chat2 += user2.toLowerCase().codeUnits[i];
+      }
+
+      if (chat1>chat2) {
+        return "$user1$user2";
+      } else {
+        return "$user2$user1";
+      }
     }
-  }
 
     return DefaultTabController(
         length: 6,
-        child:Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
             toolbarHeight: 110,
 
             centerTitle: true,
@@ -55,12 +65,6 @@ class SingleAnonce extends StatelessWidget {
             ),
             bottom: PreferredSize(
                 child: Container(
-                  /*decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 22, 70, 228),
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(50),
-                          bottomRight: Radius.circular(50))),*/
-
                   child: TabBar(
                       isScrollable: true,
                       unselectedLabelColor: Colors.white.withOpacity(0.3),
@@ -99,8 +103,7 @@ class SingleAnonce extends StatelessWidget {
               )
             ],
           ),
-        
-        drawer: Drawer(
+          drawer: Drawer(
             child: ListView(
               children: [
                 UserAccountsDrawerHeader(
@@ -163,116 +166,110 @@ class SingleAnonce extends StatelessWidget {
               ],
             ),
           ),
-        body: Container(
-          padding: EdgeInsets.only(
-                  left: 15.0, top: 15.0, right: 15.0, bottom: 10.0),
-          child: FutureBuilder<DocumentSnapshot>(
-            future: anonces.doc(anonceId).get(),
-            builder: (BuildContext context,
-                AsyncSnapshot<DocumentSnapshot> snapshot) {
-              if (snapshot.hasError) {
-                return Text("Something went wrong");
-              }
+          body: Container(
+            padding: EdgeInsets.only(
+                left: 15.0, top: 15.0, right: 15.0, bottom: 10.0),
+            child: FutureBuilder<DocumentSnapshot>(
+              future: anonces.doc(anonceId).get(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<DocumentSnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text("Something went wrong");
+                }
 
-              if (snapshot.hasData && !snapshot.data!.exists) {
-                return Text("Document does not exist");
-              }
+                if (snapshot.hasData && !snapshot.data!.exists) {
+                  return Text("Document does not exist");
+                }
 
-              if (snapshot.connectionState == ConnectionState.done) {
-                Map<String, dynamic> data =
-                    snapshot.data!.data() as Map<String, dynamic>;
+                if (snapshot.connectionState == ConnectionState.done) {
+                  Map<String, dynamic> data =
+                      snapshot.data!.data() as Map<String, dynamic>;
 
-                return Column(children: [
-                  Container(
-                    child: Card(
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 200,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15.0),
-                                image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(data['photos'][0]))),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.arrow_drop_down_circle),
-                            title: Text(data['libelle']),
-                            subtitle: Text(
-                              data["description"],
-                              style: TextStyle(
-                                  color: Colors.black.withOpacity(0.6)),
+                  return Column(children: [
+                    Container(
+                      child: Card(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 200,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(data['photos'][0]))),
                             ),
-                          ),
-                          ButtonBar(
-                                              alignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                FlatButton(
-                                                  textColor:
-                                                      const Color(0xFF6200EE),
-                                                  onPressed: () {
-                                                    String roomId = chatRoomId(
-                                                        data["libelle"], anonceId);
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            ChatRoom(
-                                                          chatRoomId: roomId,
-                                                          userId: data["annonceurId"],
-                                                        ),
-                                                      ),
-                                                    );
-                                                    print(userId);
-                                                  },
-                                                  child: const Text('Laisser un message'),
-                                                ),
-                                                
-                                              ],
-                                            ),
-                          
-                        ],
+                            ListTile(
+                              leading: const Icon(Icons.arrow_drop_down_circle),
+                              title: Text(data['libelle']),
+                              subtitle: Text(
+                                data["description"],
+                                style: TextStyle(
+                                    color: Colors.black.withOpacity(0.6)),
+                              ),
+                            ),
+                            ButtonBar(
+                              alignment: MainAxisAlignment.start,
+                              children: [
+                                ElevatedButton.icon(
+                                  icon: const Icon(
+                                    Icons.message_rounded,
+                                    color: Color.fromARGB(255, 255, 255, 238),
+                                    size: 24.0,
+                                  ),
+                                  label: Text('Message'),
+                                  onPressed: () {
+                                    String roomId = chatRoomId(
+                                        _auth.currentUser!.uid,
+                                        data["annonceurId"]);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatRoom(
+                                          chatRoomId: roomId,
+                                          userId: data["annonceurId"],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    shape: new RoundedRectangleBorder(
+                                      borderRadius:
+                                          new BorderRadius.circular(20.0),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  
-                   
-                     Row(
-                       
-                      children: List.generate(data["photos"].length, (index) => 
-                      FadeAnimation(
-                    2,
-                    
-                      Container(
-                        
-                                height: 100,
-                                width: 100,
-                               
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                                      BorderRadius.circular(
-                                  15.0),
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(
-                                      data['photos'][index]))),
-                                ),
-                      )
-                      
-                      )
-                      )
-                    
-                  
-                ]);
-              }
+                    Row(
+                        children: List.generate(
+                            data["photos"].length,
+                            (index) => FadeAnimation(
+                                  2,
+                                  Container(
+                                    height: 100,
+                                    width: 100,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                        image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: NetworkImage(
+                                                data['photos'][index]))),
+                                  ),
+                                )))
+                  ]);
+                }
 
-              return CircularProgressIndicator();
-            },
+                return CircularProgressIndicator();
+              },
+            ),
           ),
-    ),
-      bottomNavigationBar: BottomNavigationBar(
+          bottomNavigationBar: BottomNavigationBar(
             backgroundColor: Color.fromARGB(252, 251, 251, 251),
             selectedItemColor: Color.fromARGB(255, 24, 133, 244),
             unselectedItemColor:
@@ -294,6 +291,6 @@ class SingleAnonce extends StatelessWidget {
                   icon: Icon(Icons.person), label: 'Profile')
             ],
           ),
-    ));
+        ));
   }
 }

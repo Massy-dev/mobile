@@ -1,4 +1,8 @@
+
+
 import 'package:flutter/material.dart';
+
+import '../screens/authenticate/register.dart';
 
 const textInputDecoration = InputDecoration(
   //hintText:'Email',
@@ -43,3 +47,4 @@ const textInputDecorationProfil = InputDecoration(
     borderSide: BorderSide(color: Color.fromARGB(175, 14, 119, 255), width:1.0)
   ),
 );
+

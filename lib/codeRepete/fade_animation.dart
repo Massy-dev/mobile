@@ -8,7 +8,7 @@ class FadeAnimation extends StatelessWidget {
   final Widget child;
 
   // ignore: use_key_in_widget_constructors
-  const FadeAnimation(this.delay, this.child);
+  const FadeAnimation(this.delay, this.child, {BoxDecoration? decoration});
 
   @override
   Widget build(BuildContext context) {

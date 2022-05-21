@@ -19,7 +19,6 @@ class MapScreenState extends State<ProfilePages>
   String prenom = "";
   String email = "";
   String photo = "";
-  //String? imageUrl
 
   @override
   void initState() {

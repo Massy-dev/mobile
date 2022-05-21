@@ -31,7 +31,7 @@ class _LoginState extends State<Login> {
           children: [
             Container(
                 margin: const EdgeInsets.only(top: 100),
-                child: const FadeAnimation(
+                child: FadeAnimation(
                   2,
                   Text(
                     "Slakosta",

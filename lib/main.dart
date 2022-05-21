@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:scomv1/screens/authenticate/register.dart';
+import 'package:scomv1/screens/chat/chatList.dart';
 import 'package:scomv1/screens/pages/accueil.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,20 +22,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (_, snapshot) {
-            if (snapshot.data == null) {
-              return const Register();
-            }
-
-            User? user = FirebaseAuth.instance.currentUser;
-            //if user isn't signed in
-
-            //return CreateProfil(userId: user!.uid);
-            return MyHomePage();
-            //if user is signed in
-          }),
+             
+      home: MyHomePage(),
+      
     );
   }
 }

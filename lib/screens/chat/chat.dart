@@ -10,7 +10,7 @@ import 'package:uuid/uuid.dart';
 class ChatRoom extends StatelessWidget {
   final String userId;
   final String chatRoomId;
-  
+
   ChatRoom({required this.chatRoomId, required this.userId});
 
   final TextEditingController _message = TextEditingController();
@@ -41,8 +41,8 @@ class ChatRoom extends StatelessWidget {
         .collection('chats')
         .doc(fileName)
         .set({
-      "sender": user!.uid,
-      "receiver":userId,
+      "sender": _auth.currentUser!.uid,
+      "receiver": userId,
       "message": "",
       "type": "img",
       "time": FieldValue.serverTimestamp(),
@@ -79,14 +79,22 @@ class ChatRoom extends StatelessWidget {
   void onSendMessage() async {
     if (_message.text.isNotEmpty) {
       Map<String, dynamic> messages = {
-        "sender": user!.uid,
-        "receiver":userId,
+        "sender": _auth.currentUser!.uid,
+        "receiver": userId,
         "message": _message.text,
         "type": "text",
         "time": FieldValue.serverTimestamp(),
       };
 
       _message.clear();
+      await _firestore
+          .collection('chatroom')
+          .doc(chatRoomId)
+          .set({
+            "emetteur":_auth.currentUser!.uid,
+            "recepteur":userId
+            });
+
       await _firestore
           .collection('chatroom')
           .doc(chatRoomId)
@@ -104,16 +112,22 @@ class ChatRoom extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: StreamBuilder<DocumentSnapshot>(
-          stream:
-              _firestore.collection("Utilisateurs").doc(userId).snapshots(),
+          stream: _firestore.collection("Utilisateurs").doc(userId).snapshots(),
           builder: (context, snapshot) {
             if (snapshot.data != null) {
               return Container(
                 child: Column(
+                  
                   children: [
-                    Text(snapshot.data!['nom']),
+                   
+                    /*CircleAvatar(
+                      radius: 30,
+                        backgroundImage: NetworkImage(snapshot.data!["photo"]),
+                      ),*/
+
+                    Text(snapshot.data!['nom']+" "+snapshot.data!['prenom']),
                     Text(
-                      snapshot.data!['prenom'],
+                      "En ligne",
                       style: TextStyle(fontSize: 14),
                     ),
                   ],
@@ -129,7 +143,6 @@ class ChatRoom extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              
               height: size.height / 1.25,
               width: size.width,
               child: StreamBuilder<QuerySnapshot>(
@@ -187,7 +200,6 @@ class ChatRoom extends StatelessWidget {
                   ],
                 ),
               ),
-              
             ),
           ],
         ),
@@ -199,7 +211,7 @@ class ChatRoom extends StatelessWidget {
     return map['type'] == "text"
         ? Container(
             width: size.width,
-            alignment: map['sendby'] == _auth.currentUser!.displayName
+            alignment: map['sender'] == _auth.currentUser!.uid
                 ? Alignment.centerRight
                 : Alignment.centerLeft,
             child: Container(
@@ -207,7 +219,9 @@ class ChatRoom extends StatelessWidget {
               margin: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                color: Colors.blue,
+                color: map['sender'] == _auth.currentUser!.uid
+                    ? Color.fromARGB(255, 33, 107, 243)
+                    : Color.fromARGB(255, 243, 124, 33),
               ),
               child: Text(
                 map['message'],
